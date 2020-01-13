@@ -2,8 +2,11 @@ package org.fasttrackit.feedbackapplication.web;
 
 import org.fasttrackit.feedbackapplication.domain.Product;
 import org.fasttrackit.feedbackapplication.service.ProductService;
+import org.fasttrackit.feedbackapplication.transfer.ProductResponse;
 import org.fasttrackit.feedbackapplication.transfer.SaveProductRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,12 @@ public class ProductController {
     public ResponseEntity<Product> getProduct(@PathVariable Long id){
         Product product = productService.getProduct(id);
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ProductResponse>> getProducts(ProductResponse request, Pageable pageable){
+        Page<ProductResponse> products = productService.getProducts(request, pageable);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

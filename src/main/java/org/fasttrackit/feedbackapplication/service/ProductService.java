@@ -3,12 +3,20 @@ package org.fasttrackit.feedbackapplication.service;
 import org.fasttrackit.feedbackapplication.domain.Product;
 import org.fasttrackit.feedbackapplication.exception.ResourceNotFoundException;
 import org.fasttrackit.feedbackapplication.persistance.ProductRepository;
+import org.fasttrackit.feedbackapplication.transfer.ProductResponse;
 import org.fasttrackit.feedbackapplication.transfer.SaveProductRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -37,6 +45,24 @@ public class ProductService {
                 //lambda expression
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Product " + id + " does not exist."));
+    }
+
+    @Transactional
+    public Page<ProductResponse> getProducts(ProductResponse request, Pageable pageable) {
+        LOGGER.info("Retrieving Products: {}", request);
+
+        Page<Product> products;
+        products = productRepository.findAll(pageable);
+        List<ProductResponse> productResponses = new ArrayList<>();
+
+        for (Product product : products.getContent()) {
+            ProductResponse productResponse = new ProductResponse();
+            productResponse.setId(product.getId());
+            productResponse.setName(product.getName());
+
+            productResponses.add(productResponse);
+        }
+        return new PageImpl<>(productResponses, pageable, products.getTotalElements());
     }
 
     public Product updateProduct(long id, SaveProductRequest request) {
